@@ -23,9 +23,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, UNUs
 
     // The pet itself is rendered at 60% of the original approved size.
     private let compactSize = NSSize(width: 190, height: 264)
-    // Keep bubbles comfortably readable while pairing them with the smaller pet.
-    private let expandedSize = NSSize(width: 530, height: 350)
-    private let encouragementSize = NSSize(width: 530, height: 264)
+    // Include transparent breathing room for the bubble shadow at the outer
+    // edge and above/below while keeping the pet anchored in place.
+    private let expandedSize = NSSize(width: 558, height: 406)
+    private let encouragementSize = NSSize(width: 558, height: 320)
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)

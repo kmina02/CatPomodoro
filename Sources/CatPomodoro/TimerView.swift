@@ -19,6 +19,11 @@ struct RootView: View {
                 activeBubble
             }
         }
+        // Reserve transparent space outside the bubble-facing window edge so
+        // the soft shadow can fade out instead of being clipped by the panel.
+        .padding(.leading, model.isPresentingBubble && model.bubbleOnLeft ? 28 : 0)
+        .padding(.trailing, model.isPresentingBubble && !model.bubbleOnLeft ? 28 : 0)
+        .padding(.vertical, model.isPresentingBubble ? 28 : 0)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
@@ -291,17 +296,20 @@ struct CompletionBubble: View {
                         ConfettiMark(rotation: 28)
                     }
                     Text(completedFocus ? "집중 완료!" : "휴식 완료!")
-                        .font(.system(size: 29, weight: .heavy, design: .rounded))
+                        .font(.system(size: 29, weight: .bold, design: .default))
                         .foregroundStyle(completedFocus ? Color.pomodoroCoral : Color.pomodoroSage)
+                        .lineLimit(1)
+                        .fixedSize(horizontal: true, vertical: false)
                 }
 
-                Text(completedFocus ? "\(model.totalSeconds / 60)분 집중했어요" : "충전이 끝났어요")
+                Text(completedFocus ? "\(model.totalSeconds / 60)분 집중했어요 😻" : "충전이 끝났어요 😻")
                     .font(.system(size: 16, weight: .semibold, design: .rounded))
                     .foregroundStyle(Color.pomodoroInk)
 
                 PrimaryButton(
                     title: completedFocus ? "\(model.restMinutes)분 휴식 시작" : "\(model.focusMinutes)분 집중 시작",
-                    color: completedFocus ? .pomodoroCoral : .pomodoroSage
+                    color: completedFocus ? .pomodoroCoral : .pomodoroSage,
+                    fontWeight: .bold
                 ) {
                     if completedFocus {
                         model.startRestSession()
@@ -399,12 +407,13 @@ struct PresetButton: View {
 struct PrimaryButton: View {
     let title: String
     let color: Color
+    var fontWeight: Font.Weight = .heavy
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
             Text(title)
-                .font(.system(size: 17, weight: .heavy, design: .rounded))
+                .font(.system(size: 17, weight: fontWeight, design: .rounded))
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
                 .frame(height: 48)
