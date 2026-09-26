@@ -1,6 +1,10 @@
-# 냥모도로
+# 냥모도로 (CatPomodoro)
 
 시계에 매달린 고양이가 항상 화면 위에 떠 있는 macOS용 45/15 뽀모도로 타이머입니다.
+
+A cute floating Pomodoro timer for macOS, featuring a cozy animated cat. 🐱🍅
+
+<img width="578" height="357" alt="CatPomodoro floating timer" src="https://github.com/user-attachments/assets/27108f5d-c3a3-4ff6-aaee-f188f52f229c" />
 
 ## 기능
 
