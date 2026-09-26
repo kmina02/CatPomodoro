@@ -23,10 +23,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, UNUs
 
     // The pet itself is rendered at 60% of the original approved size.
     private let compactSize = NSSize(width: 190, height: 264)
-    // Include transparent breathing room for the bubble shadow at the outer
-    // edge and above/below while keeping the pet anchored in place.
-    private let expandedSize = NSSize(width: 558, height: 406)
-    private let encouragementSize = NSSize(width: 558, height: 320)
+    // A shadow with an 18pt blur needs roughly three times that distance to
+    // fade fully before it reaches the transparent panel boundary.
+    private let expandedSize = NSSize(width: 586, height: 462)
+    private let encouragementSize = NSSize(width: 586, height: 376)
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)

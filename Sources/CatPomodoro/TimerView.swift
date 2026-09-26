@@ -19,11 +19,11 @@ struct RootView: View {
                 activeBubble
             }
         }
-        // Reserve transparent space outside the bubble-facing window edge so
-        // the soft shadow can fade out instead of being clipped by the panel.
-        .padding(.leading, model.isPresentingBubble && model.bubbleOnLeft ? 28 : 0)
-        .padding(.trailing, model.isPresentingBubble && !model.bubbleOnLeft ? 28 : 0)
-        .padding(.vertical, model.isPresentingBubble ? 28 : 0)
+        // Let the 18pt blur fade to full transparency before it reaches the
+        // hosting panel boundary. The matching panel sizes live in AppMain.
+        .padding(.leading, model.isPresentingBubble && model.bubbleOnLeft ? 56 : 0)
+        .padding(.trailing, model.isPresentingBubble && !model.bubbleOnLeft ? 56 : 0)
+        .padding(.vertical, model.isPresentingBubble ? 56 : 0)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
