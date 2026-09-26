@@ -343,7 +343,7 @@ struct DurationRow: View {
             Text(title)
                 .font(.system(size: 17, weight: .bold, design: .rounded))
                 .foregroundStyle(Color.pomodoroInk)
-                .frame(width: 60, alignment: .center)
+                .frame(width: 30, alignment: .center)
 
             StepButton(symbol: "minus", action: onMinus)
 
