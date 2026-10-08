@@ -95,22 +95,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, UNUs
         if let button = item.button {
             button.image = NSImage(
                 systemSymbolName: "timer",
-                accessibilityDescription: "냥모도로"
+                accessibilityDescription: "CatPomodoro"
             )
-            button.toolTip = "냥모도로"
+            button.toolTip = "CatPomodoro"
         }
 
         let menu = NSMenu()
-        menu.addItem(menuItem("타이머 보기", action: #selector(showTimer), key: "t"))
+        menu.addItem(menuItem("Show Timer", action: #selector(showTimer), key: "t"))
 
-        let pauseItem = menuItem("집중 시작", action: #selector(toggleTimer), key: " ")
+        let pauseItem = menuItem("Start Focus", action: #selector(toggleTimer), key: " ")
         menu.addItem(pauseItem)
         self.pauseMenuItem = pauseItem
 
-        menu.addItem(menuItem("타이머 설정…", action: #selector(showSettings), key: ","))
-        menu.addItem(menuItem("초기화", action: #selector(resetTimer), key: "r"))
+        menu.addItem(menuItem("Timer Settings…", action: #selector(showSettings), key: ","))
+        menu.addItem(menuItem("Reset", action: #selector(resetTimer), key: "r"))
         menu.addItem(.separator())
-        menu.addItem(menuItem("냥모도로 종료", action: #selector(quitApp), key: "q"))
+        menu.addItem(menuItem("Quit CatPomodoro", action: #selector(quitApp), key: "q"))
         item.menu = menu
         statusItem = item
         updateStatusMenu()
@@ -146,7 +146,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, UNUs
     }
 
     private func updateStatusMenu() {
-        pauseMenuItem?.title = model.isRunning ? "일시정지" : "\(model.phase.title) 시작"
+        pauseMenuItem?.title = model.isRunning ? "Pause" : "Start \(model.phase.title)"
     }
 
     private func resizePanelForPresentation() {

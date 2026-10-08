@@ -108,16 +108,16 @@ struct TimerPetView: View {
             WindowDragArea()
                 .frame(width: 205, height: 72)
                 .position(x: 145, y: 72)
-                .help("드래그해서 위치 이동")
+                .help("Drag to move")
 
             VStack(spacing: 8) {
-                FloatingIconButton(symbol: "gearshape.fill", label: "타이머 설정") {
+                FloatingIconButton(symbol: "gearshape.fill", label: "Timer Settings") {
                     model.toggleSettings()
                 }
-                FloatingIconButton(symbol: "arrow.counterclockwise", label: "초기화") {
+                FloatingIconButton(symbol: "arrow.counterclockwise", label: "Reset") {
                     model.resetCurrentSession()
                 }
-                FloatingIconButton(symbol: "xmark", label: "숨기기") {
+                FloatingIconButton(symbol: "xmark", label: "Hide") {
                     onHide()
                 }
             }
@@ -173,7 +173,7 @@ struct TimerFaceView: View {
                         .background(Circle().fill(Color.pomodoroBlush))
                 }
                 .buttonStyle(.plain)
-                .help(model.isRunning ? "일시정지" : "시작")
+                .help(model.isRunning ? "Pause" : "Start")
             }
         }
     }
@@ -191,7 +191,7 @@ struct EncouragementBubble: View {
                 HStack(spacing: 8) {
                     Image(systemName: "pawprint.fill")
                         .foregroundStyle(Color.pomodoroCoral)
-                    Text("\(milestone)% 남았어")
+                    Text("\(milestone)% left")
                         .font(.system(size: 15, weight: .heavy, design: .rounded))
                         .foregroundStyle(Color.pomodoroCoral)
                     Spacer()
@@ -222,7 +222,7 @@ struct SettingsBubble: View {
         BubbleCard(pointsLeft: pointsLeft) {
             VStack(alignment: .leading, spacing: 17) {
                 HStack {
-                    Text("타이머 설정")
+                    Text("Timer Settings")
                         .font(.system(size: 22, weight: .heavy, design: .rounded))
                         .foregroundStyle(Color.pomodoroInk)
                     Spacer()
@@ -237,14 +237,14 @@ struct SettingsBubble: View {
                 }
 
                 DurationRow(
-                    title: "집중",
+                    title: "Focus",
                     minutes: model.focusMinutes,
                     onMinus: { model.adjustFocus(by: -5) },
                     onPlus: { model.adjustFocus(by: 5) }
                 )
 
                 DurationRow(
-                    title: "휴식",
+                    title: "Break",
                     minutes: model.restMinutes,
                     onMinus: { model.adjustRest(by: -5) },
                     onPlus: { model.adjustRest(by: 5) }
@@ -262,7 +262,7 @@ struct SettingsBubble: View {
                     }
                 }
 
-                PrimaryButton(title: "시작", color: .pomodoroCoral) {
+                PrimaryButton(title: "Start", color: .pomodoroCoral) {
                     model.startFocusSession()
                 }
             }
@@ -290,24 +290,18 @@ struct CompletionBubble: View {
                     .buttonStyle(.plain)
                 }
 
-                ZStack {
-                    HStack(spacing: 28) {
-                        ConfettiMark(rotation: -28)
-                        ConfettiMark(rotation: 28)
-                    }
-                    Text(completedFocus ? "집중 완료!" : "휴식 완료!")
-                        .font(.system(size: 29, weight: .bold, design: .default))
-                        .foregroundStyle(completedFocus ? Color.pomodoroCoral : Color.pomodoroSage)
-                        .lineLimit(1)
-                        .fixedSize(horizontal: true, vertical: false)
-                }
+                Text(completedFocus ? "Focus Complete!" : "Break Complete!")
+                    .font(.system(size: 29, weight: .bold, design: .default))
+                    .foregroundStyle(completedFocus ? Color.pomodoroCoral : Color.pomodoroSage)
+                    .lineLimit(1)
+                    .fixedSize(horizontal: true, vertical: false)
 
-                Text(completedFocus ? "\(model.totalSeconds / 60)분 집중했어요 😻" : "충전이 끝났어요 😻")
+                Text(completedFocus ? "You focused for \(model.totalSeconds / 60) minutes 😻" : "You’re recharged 😻")
                     .font(.system(size: 16, weight: .semibold, design: .rounded))
                     .foregroundStyle(Color.pomodoroInk)
 
                 PrimaryButton(
-                    title: completedFocus ? "\(model.restMinutes)분 휴식 시작" : "\(model.focusMinutes)분 집중 시작",
+                    title: completedFocus ? "Start \(model.restMinutes)-min Break" : "Start \(model.focusMinutes)-min Focus",
                     color: completedFocus ? .pomodoroCoral : .pomodoroSage,
                     fontWeight: .bold
                 ) {
@@ -318,7 +312,7 @@ struct CompletionBubble: View {
                     }
                 }
 
-                Button(completedFocus ? "5분 더" : "5분 더 쉬기") {
+                Button(completedFocus ? "5 More Minutes" : "Rest 5 More Minutes") {
                     model.addFiveMinutes()
                 }
                 .font(.system(size: 15, weight: .bold, design: .rounded))
@@ -351,11 +345,11 @@ struct DurationRow: View {
             Text(title)
                 .font(.system(size: 17, weight: .bold, design: .rounded))
                 .foregroundStyle(Color.pomodoroInk)
-                .frame(width: 30, alignment: .center)
+                .frame(width: 52, alignment: .center)
 
             StepButton(symbol: "minus", action: onMinus)
 
-            Text("\(minutes)분")
+            Text("\(minutes) min")
                 .font(.system(size: 18, weight: .heavy, design: .rounded))
                 .monospacedDigit()
                 .foregroundStyle(Color.pomodoroInk)
@@ -488,17 +482,6 @@ struct BubblePointer: Shape {
         path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
         path.closeSubpath()
         return path
-    }
-}
-
-struct ConfettiMark: View {
-    let rotation: Double
-
-    var body: some View {
-        Capsule()
-            .fill(Color.pomodoroCoral)
-            .frame(width: 7, height: 22)
-            .rotationEffect(.degrees(rotation))
     }
 }
 

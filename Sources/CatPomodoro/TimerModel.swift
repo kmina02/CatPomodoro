@@ -10,8 +10,8 @@ final class TimerModel: ObservableObject {
 
         var title: String {
             switch self {
-            case .focus: return "집중"
-            case .rest: return "휴식"
+            case .focus: return "Focus"
+            case .rest: return "Break"
             }
         }
     }
@@ -39,32 +39,32 @@ final class TimerModel: ObservableObject {
     private let milestonePercents = [75, 50, 25, 10]
     private static let encouragements: [Int: [String]] = [
         75: [
-            "시작이 반이라더니, 벌써 멋지게 출발했다냥!",
-            "첫발이 제일 어려운 법! 지금 아주 잘하고 있다냥.",
-            "집중 모드가 반짝 켜졌네! 이 흐름 그대로 가보자, 야옹!",
-            "좋은 출발이야. 내가 옆에서 응원하고 있다냥!",
-            "지금 페이스 딱 좋아! 천천히 꾸준히 가보자냥."
+            "Great start! You’re already doing wonderfully, meow!",
+            "The first step is the hardest—and you nailed it, meow!",
+            "Focus mode is on! Keep this lovely rhythm going, meow!",
+            "You’re off to a great start. I’m cheering right beside you!",
+            "Your pace is purr-fect. Slow and steady, meow!"
         ],
         50: [
-            "벌써 반이나 왔다냥! 이 기세 그대로 가보자!",
-            "절반 통과! 집중력이 아주 반짝반짝한다냥.",
-            "반이나 해냈어! 남은 절반도 내가 같이 있어줄게, 야옹!",
-            "여기까지 온 거 정말 대단해. 한 번 더 쭉 가자냥!",
-            "반환점 도착! 어깨 한 번 펴고 다시 집중, 야옹!"
+            "Halfway there already! Keep that momentum going, meow!",
+            "Halfway done! Your focus is shining bright.",
+            "You did half of it! I’ll stay for the rest, meow!",
+            "Look how far you’ve come. Let’s keep going!",
+            "Midpoint reached! Stretch once, then focus, meow!"
         ],
         25: [
-            "거의 다 왔다냥! 마지막 한 걸음만 더!",
-            "끝이 보인다! 지금처럼만 하면 된다냥.",
-            "조금만 더 힘내자. 휴식이 꼬리를 흔들며 기다린다냥!",
-            "여기까지 왔으면 다 한 거나 마찬가지야. 야옹!",
-            "집중력 최고! 마무리까지 살금살금 가보자냥."
+            "Almost there! Just one more little push, meow!",
+            "The finish line is in sight. Keep going!",
+            "Just a little more. Your break is waiting, tail wagging!",
+            "You’ve come this far—you’ve practically got it, meow!",
+            "Amazing focus! Let’s tiptoe to the finish."
         ],
         10: [
-            "진짜 조금만 더! 곧 포근한 휴식이다냥.",
-            "마지막 10%! 내가 끝까지 옆에 있을게, 야옹!",
-            "휴식이 코앞이다냥! 한 번만 더 집중!",
-            "거의 끝! 지금 하던 것만 마무리해보자냥.",
-            "조금만 더 하면 간식… 아니, 휴식 시간이다냥!"
+            "Just a tiny bit more! A cozy break is almost here.",
+            "Final 10%! I’m right beside you to the end, meow!",
+            "Your break is so close! One last burst of focus!",
+            "Almost done! Wrap up what you’re working on, meow.",
+            "A little more, then snack—oops, break time, meow!"
         ]
     ]
 
@@ -273,11 +273,11 @@ final class TimerModel: ObservableObject {
     private func deliverCompletionNotification() {
         let content = UNMutableNotificationContent()
         if phase == .focus {
-            content.title = "집중 완료!"
-            content.body = "\(totalSeconds / 60)분 집중했어요. 이제 잠깐 쉬어볼까요?"
+            content.title = "Focus Complete!"
+            content.body = "You focused for \(totalSeconds / 60) minutes. Ready for a short break?"
         } else {
-            content.title = "휴식 완료!"
-            content.body = "충전 완료. 다시 집중을 시작할 시간이에요."
+            content.title = "Break Complete!"
+            content.body = "You’re recharged. Time to focus again."
         }
         content.sound = .default
 
