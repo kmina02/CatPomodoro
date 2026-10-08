@@ -23,10 +23,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, UNUs
 
     // The pet itself is rendered at 60% of the original approved size.
     private let compactSize = NSSize(width: 190, height: 264)
-    // Include transparent breathing room for the bubble shadow at the outer
-    // edge and above/below while keeping the pet anchored in place.
-    private let expandedSize = NSSize(width: 558, height: 406)
-    private let encouragementSize = NSSize(width: 558, height: 320)
+    // A shadow with an 18pt blur needs roughly three times that distance to
+    // fade fully before it reaches the transparent panel boundary.
+    private let expandedSize = NSSize(width: 586, height: 462)
+    private let encouragementSize = NSSize(width: 586, height: 376)
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -95,22 +95,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, UNUs
         if let button = item.button {
             button.image = NSImage(
                 systemSymbolName: "timer",
-                accessibilityDescription: "냥모도로"
+                accessibilityDescription: "CatPomodoro"
             )
-            button.toolTip = "냥모도로"
+            button.toolTip = "CatPomodoro"
         }
 
         let menu = NSMenu()
-        menu.addItem(menuItem("타이머 보기", action: #selector(showTimer), key: "t"))
+        menu.addItem(menuItem("Show Timer", action: #selector(showTimer), key: "t"))
 
-        let pauseItem = menuItem("집중 시작", action: #selector(toggleTimer), key: " ")
+        let pauseItem = menuItem("Start Focus", action: #selector(toggleTimer), key: " ")
         menu.addItem(pauseItem)
         self.pauseMenuItem = pauseItem
 
-        menu.addItem(menuItem("타이머 설정…", action: #selector(showSettings), key: ","))
-        menu.addItem(menuItem("초기화", action: #selector(resetTimer), key: "r"))
+        menu.addItem(menuItem("Timer Settings…", action: #selector(showSettings), key: ","))
+        menu.addItem(menuItem("Reset", action: #selector(resetTimer), key: "r"))
         menu.addItem(.separator())
-        menu.addItem(menuItem("냥모도로 종료", action: #selector(quitApp), key: "q"))
+        menu.addItem(menuItem("Quit CatPomodoro", action: #selector(quitApp), key: "q"))
         item.menu = menu
         statusItem = item
         updateStatusMenu()
@@ -146,7 +146,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, UNUs
     }
 
     private func updateStatusMenu() {
-        pauseMenuItem?.title = model.isRunning ? "일시정지" : "\(model.phase.title) 시작"
+        pauseMenuItem?.title = model.isRunning ? "Pause" : "Start \(model.phase.title)"
     }
 
     private func resizePanelForPresentation() {
