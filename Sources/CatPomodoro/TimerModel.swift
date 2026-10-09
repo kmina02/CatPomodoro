@@ -24,6 +24,10 @@ final class TimerModel: ObservableObject {
     @Published var restMinutes: Int
     @Published private(set) var showsSettings = false
     @Published private(set) var showsCompletion = false
+    @Published private(set) var showsGoalPrompt = false
+    @Published private(set) var showsGoalHover = false
+    @Published var focusGoalDraft = ""
+    @Published private(set) var currentFocusGoal: String?
     @Published private(set) var encouragementMessage: String?
     @Published private(set) var encouragementMilestone: Int?
     @Published var bubbleOnLeft = false
@@ -37,6 +41,7 @@ final class TimerModel: ObservableObject {
     private var triggeredMilestones = Set<Int>()
 
     private let milestonePercents = [75, 50, 25, 10]
+    static let maximumGoalLength = 80
     private static let encouragements: [Int: [String]] = [
         75: [
             "Great start! You’re already doing wonderfully, meow!",
@@ -88,11 +93,26 @@ final class TimerModel: ObservableObject {
     }
 
     var isPresentingBubble: Bool {
-        showsSettings || showsCompletion || encouragementMessage != nil
+        showsSettings
+            || showsCompletion
+            || showsGoalPrompt
+            || showsGoalHover
+            || encouragementMessage != nil
     }
 
     var isShowingEncouragement: Bool {
-        encouragementMessage != nil && !showsSettings && !showsCompletion
+        encouragementMessage != nil
+            && !showsSettings
+            && !showsCompletion
+            && !showsGoalPrompt
+    }
+
+    var isShowingCompactBubble: Bool {
+        isShowingEncouragement || showsGoalHover
+    }
+
+    var canConfirmFocusGoal: Bool {
+        !focusGoalDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     func toggleRunning() {
@@ -102,15 +122,64 @@ final class TimerModel: ObservableObject {
             if remainingSeconds == 0 {
                 resetCurrentSession()
             }
+
+            if phase == .focus, currentFocusGoal == nil {
+                startFocusSession()
+                return
+            }
+
             startTicker()
         }
     }
 
     func startFocusSession() {
+        stopTicker()
+        triggeredMilestones.removeAll()
+        phase = .focus
+        totalSeconds = focusMinutes * 60
+        remainingSeconds = totalSeconds
+        isRunning = false
+        currentFocusGoal = nil
+        clearEncouragement()
+        showsGoalHover = false
+        showsCompletion = false
+        showsSettings = false
+        showsGoalPrompt = true
+        onPresentationChanged?()
+        onTimerStateChanged?()
+    }
+
+    func confirmFocusGoal() {
+        let goal = focusGoalDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !goal.isEmpty else { return }
+
+        currentFocusGoal = String(goal.prefix(Self.maximumGoalLength))
+        focusGoalDraft = ""
         start(phase: .focus, minutes: focusMinutes)
     }
 
+    func updateFocusGoalDraft(_ value: String) {
+        focusGoalDraft = String(value.prefix(Self.maximumGoalLength))
+    }
+
+    func backToTimerSettings() {
+        showsGoalPrompt = false
+        showsGoalHover = false
+        showsCompletion = false
+        showsSettings = true
+        onPresentationChanged?()
+    }
+
+    func dismissGoalPrompt() {
+        showsGoalPrompt = false
+        focusGoalDraft = ""
+        onPresentationChanged?()
+    }
+
     func startRestSession() {
+        currentFocusGoal = nil
+        focusGoalDraft = ""
+        showsGoalHover = false
         start(phase: .rest, minutes: restMinutes)
     }
 
@@ -124,12 +193,16 @@ final class TimerModel: ObservableObject {
         remainingSeconds = duration(for: phase) * 60
         totalSeconds = remainingSeconds
         isRunning = false
+        currentFocusGoal = nil
+        focusGoalDraft = ""
         closePresentations()
         onTimerStateChanged?()
     }
 
     func openSettings() {
         clearEncouragement()
+        showsGoalHover = false
+        showsGoalPrompt = false
         showsCompletion = false
         showsSettings = true
         onPresentationChanged?()
@@ -139,6 +212,8 @@ final class TimerModel: ObservableObject {
         if !showsSettings {
             clearEncouragement()
         }
+        showsGoalHover = false
+        showsGoalPrompt = false
         showsCompletion = false
         showsSettings.toggle()
         onPresentationChanged?()
@@ -149,6 +224,10 @@ final class TimerModel: ObservableObject {
         triggeredMilestones.removeAll()
         remainingSeconds = duration(for: phase) * 60
         totalSeconds = remainingSeconds
+        if phase == .focus {
+            currentFocusGoal = nil
+            focusGoalDraft = ""
+        }
         onPresentationChanged?()
     }
 
@@ -161,6 +240,8 @@ final class TimerModel: ObservableObject {
         remainingSeconds = 0
         isRunning = false
         showsSettings = false
+        showsGoalPrompt = false
+        showsGoalHover = false
         showsCompletion = true
         onPresentationChanged?()
         onTimerStateChanged?()
@@ -173,8 +254,59 @@ final class TimerModel: ObservableObject {
         remainingSeconds = Int(Double(totalSeconds) * 0.75)
         isRunning = false
         showsSettings = false
+        showsGoalPrompt = false
+        showsGoalHover = false
         showsCompletion = false
         showEncouragement(for: 75)
+    }
+
+    func previewGoalPrompt() {
+        stopTicker()
+        clearEncouragement()
+        phase = .focus
+        totalSeconds = focusMinutes * 60
+        remainingSeconds = totalSeconds
+        isRunning = false
+        currentFocusGoal = nil
+        focusGoalDraft = ""
+        showsSettings = false
+        showsCompletion = false
+        showsGoalHover = false
+        showsGoalPrompt = true
+        onPresentationChanged?()
+        onTimerStateChanged?()
+    }
+
+    func previewGoalHover() {
+        stopTicker()
+        clearEncouragement()
+        phase = .focus
+        totalSeconds = focusMinutes * 60
+        remainingSeconds = max(totalSeconds - (7 * 60 + 12), 1)
+        isRunning = true
+        currentFocusGoal = "Finish the landing page wireframe"
+        focusGoalDraft = ""
+        showsSettings = false
+        showsCompletion = false
+        showsGoalPrompt = false
+        showsGoalHover = true
+        onPresentationChanged?()
+        onTimerStateChanged?()
+    }
+
+    func setGoalHoverVisible(_ visible: Bool) {
+        let shouldShow = visible
+            && isRunning
+            && phase == .focus
+            && currentFocusGoal != nil
+            && !showsSettings
+            && !showsCompletion
+            && !showsGoalPrompt
+            && encouragementMessage == nil
+
+        guard showsGoalHover != shouldShow else { return }
+        showsGoalHover = shouldShow
+        onPresentationChanged?()
     }
 
     func dismissEncouragement() {
@@ -232,6 +364,10 @@ final class TimerModel: ObservableObject {
         updateRemainingTime()
         stopTicker()
         isRunning = false
+        if showsGoalHover {
+            showsGoalHover = false
+            onPresentationChanged?()
+        }
         onTimerStateChanged?()
     }
 
@@ -262,6 +398,8 @@ final class TimerModel: ObservableObject {
         remainingSeconds = 0
         isRunning = false
         showsSettings = false
+        showsGoalPrompt = false
+        showsGoalHover = false
         showsCompletion = true
 
         NSSound(named: NSSound.Name("Glass"))?.play()
@@ -294,6 +432,8 @@ final class TimerModel: ObservableObject {
         clearEncouragement()
         showsSettings = false
         showsCompletion = false
+        showsGoalPrompt = false
+        showsGoalHover = false
         if wasPresenting {
             onPresentationChanged?()
         }
@@ -329,9 +469,11 @@ final class TimerModel: ObservableObject {
     private func showEncouragement(for milestone: Int) {
         guard !showsSettings,
               !showsCompletion,
+              !showsGoalPrompt,
               let message = Self.encouragements[milestone]?.randomElement() else { return }
 
         encouragementDismissTask?.cancel()
+        showsGoalHover = false
         encouragementMilestone = milestone
         encouragementMessage = message
         onPresentationChanged?()

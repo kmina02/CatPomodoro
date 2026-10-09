@@ -10,6 +10,7 @@ A cute floating Pomodoro timer for macOS, featuring a cozy animated cat. 🐱�
 
 - 45분 집중 / 15분 휴식 기본 프리셋
 - 25/5, 45/15, 60/15 빠른 프리셋과 직접 시간 조절
+- 집중을 시작하기 전에 이번 세션의 목표를 기록하고, 실행 중 고양이에 마우스를 올려 목표와 남은 시간 확인
 - 일시정지, 재개, 초기화
 - 집중 및 휴식 종료 말풍선과 macOS 알림
 - 집중 시간 75%, 50%, 25%, 10% 지점의 무작위 고양이 응원 말풍선
@@ -34,4 +35,11 @@ open dist/CatPomodoro.app
 
 ```bash
 open -n dist/CatPomodoro.app --args --preview-completion
+```
+
+목표 입력 및 목표 호버 말풍선을 확인하는 개발용 실행 옵션도 있습니다.
+
+```bash
+open -n dist/CatPomodoro.app --args --preview-goal
+open -n dist/CatPomodoro.app --args --preview-goal-hover
 ```

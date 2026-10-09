@@ -31,6 +31,8 @@ struct RootView: View {
     private var activeBubble: some View {
         if model.showsCompletion {
             CompletionBubble(model: model, pointsLeft: !model.bubbleOnLeft)
+        } else if model.showsGoalPrompt {
+            FocusGoalBubble(model: model, pointsLeft: !model.bubbleOnLeft)
         } else if model.showsSettings {
             SettingsBubble(model: model, pointsLeft: !model.bubbleOnLeft)
         } else if let message = model.encouragementMessage {
@@ -38,6 +40,12 @@ struct RootView: View {
                 model: model,
                 message: message,
                 milestone: model.encouragementMilestone ?? 75,
+                pointsLeft: !model.bubbleOnLeft
+            )
+        } else if model.showsGoalHover, let goal = model.currentFocusGoal {
+            FocusGoalHoverBubble(
+                model: model,
+                goal: goal,
                 pointsLeft: !model.bubbleOnLeft
             )
         } else {
@@ -97,6 +105,10 @@ struct TimerPetView: View {
                     .repeatForever(autoreverses: true),
                 value: bobbing
             )
+            .contentShape(Rectangle())
+            .onHover { isHovering in
+                model.setGoalHoverVisible(isHovering)
+            }
 
             if model.showsCompletion {
                 CelebrationSparkles()
@@ -129,6 +141,9 @@ struct TimerPetView: View {
         .onAppear {
             bobbing = true
             tailSwinging = true
+        }
+        .onDisappear {
+            model.setGoalHoverVisible(false)
         }
     }
 }
@@ -211,6 +226,129 @@ struct EncouragementBubble: View {
             }
         }
         .frame(width: 330, height: 180)
+    }
+}
+
+struct FocusGoalBubble: View {
+    @ObservedObject var model: TimerModel
+    let pointsLeft: Bool
+    @FocusState private var isGoalFieldFocused: Bool
+
+    private var goalText: Binding<String> {
+        Binding(
+            get: { model.focusGoalDraft },
+            set: { model.updateFocusGoalDraft($0) }
+        )
+    }
+
+    var body: some View {
+        BubbleCard(pointsLeft: pointsLeft) {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Text("Set a Focus Goal")
+                        .font(.system(size: 22, weight: .heavy, design: .rounded))
+                        .foregroundStyle(Color.pomodoroInk)
+                    Spacer()
+                    Button(action: model.dismissGoalPrompt) {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundStyle(Color.pomodoroInk.opacity(0.7))
+                    }
+                    .buttonStyle(.plain)
+                }
+
+                Text("What do you want to finish in \(model.focusMinutes) minutes?")
+                    .font(.system(size: 18, weight: .bold, design: .rounded))
+                    .foregroundStyle(Color.pomodoroInk)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("YOUR FOCUS GOAL")
+                        .font(.system(size: 11, weight: .heavy, design: .rounded))
+                        .tracking(0.8)
+                        .foregroundStyle(Color.pomodoroCoral)
+
+                    TextField("Finish one clear task", text: goalText)
+                        .textFieldStyle(.plain)
+                        .font(.system(size: 15, weight: .semibold, design: .rounded))
+                        .foregroundStyle(Color.pomodoroInk)
+                        .padding(.horizontal, 14)
+                        .frame(height: 44)
+                        .background(
+                            RoundedRectangle(cornerRadius: 15, style: .continuous)
+                                .fill(Color.white.opacity(0.68))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 15, style: .continuous)
+                                        .stroke(Color.pomodoroCoral.opacity(isGoalFieldFocused ? 0.55 : 0.12), lineWidth: 1.5)
+                                )
+                        )
+                        .focused($isGoalFieldFocused)
+                        .onSubmit(model.confirmFocusGoal)
+
+                    Text("\(model.focusGoalDraft.count)/\(TimerModel.maximumGoalLength)")
+                        .font(.system(size: 11, weight: .medium, design: .rounded))
+                        .foregroundStyle(Color.pomodoroInk.opacity(0.48))
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                }
+
+                PrimaryButton(
+                    title: "Start Focus",
+                    color: .pomodoroCoral,
+                    isEnabled: model.canConfirmFocusGoal
+                ) {
+                    model.confirmFocusGoal()
+                }
+
+                SecondaryButton(title: "Back to Timer Settings") {
+                    model.backToTimerSettings()
+                }
+            }
+        }
+        .frame(width: 330, height: 350)
+        .onAppear {
+            DispatchQueue.main.async {
+                isGoalFieldFocused = true
+            }
+        }
+    }
+}
+
+struct FocusGoalHoverBubble: View {
+    @ObservedObject var model: TimerModel
+    let goal: String
+    let pointsLeft: Bool
+
+    var body: some View {
+        BubbleCard(pointsLeft: pointsLeft) {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(spacing: 7) {
+                    Image(systemName: "pawprint.fill")
+                        .foregroundStyle(Color.pomodoroCoral)
+                    Text("CURRENT FOCUS GOAL")
+                        .font(.system(size: 12, weight: .heavy, design: .rounded))
+                        .tracking(0.7)
+                        .foregroundStyle(Color.pomodoroCoral)
+                }
+
+                Text(goal)
+                    .font(.system(size: 18, weight: .bold, design: .rounded))
+                    .foregroundStyle(Color.pomodoroInk)
+                    .lineLimit(3)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                HStack(spacing: 7) {
+                    Circle()
+                        .fill(Color.pomodoroSage)
+                        .frame(width: 7, height: 7)
+                    Text("\(model.formattedTime) left")
+                        .font(.system(size: 13, weight: .semibold, design: .rounded))
+                        .monospacedDigit()
+                        .foregroundStyle(Color.pomodoroInk.opacity(0.65))
+                }
+            }
+        }
+        .frame(width: 330, height: 180)
+        .allowsHitTesting(false)
     }
 }
 
@@ -402,6 +540,7 @@ struct PrimaryButton: View {
     let title: String
     let color: Color
     var fontWeight: Font.Weight = .heavy
+    var isEnabled = true
     let action: () -> Void
 
     var body: some View {
@@ -411,10 +550,36 @@ struct PrimaryButton: View {
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
                 .frame(height: 48)
-                .background(RoundedRectangle(cornerRadius: 17).fill(color))
-                .shadow(color: color.opacity(0.25), radius: 7, y: 3)
+                .background(
+                    RoundedRectangle(cornerRadius: 17)
+                        .fill(isEnabled ? color : color.opacity(0.42))
+                )
+                .shadow(color: color.opacity(isEnabled ? 0.25 : 0.08), radius: 7, y: 3)
         }
         .buttonStyle(.plain)
+        .disabled(!isEnabled)
+    }
+}
+
+struct SecondaryButton: View {
+    let title: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(title, action: action)
+            .font(.system(size: 14, weight: .bold, design: .rounded))
+            .foregroundStyle(Color.pomodoroInk)
+            .buttonStyle(.plain)
+            .frame(maxWidth: .infinity)
+            .frame(height: 40)
+            .background(
+                RoundedRectangle(cornerRadius: 15, style: .continuous)
+                    .fill(Color.white.opacity(0.42))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 15, style: .continuous)
+                            .stroke(Color.pomodoroInk.opacity(0.09), lineWidth: 1)
+                    )
+            )
     }
 }
 

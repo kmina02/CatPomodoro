@@ -51,6 +51,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, UNUs
             model.previewEncouragement()
         }
 
+        if arguments.contains("--preview-goal") {
+            model.previewGoalPrompt()
+        }
+
+        if arguments.contains("--preview-goal-hover") {
+            model.previewGoalHover()
+        }
+
         if !arguments.contains("--start-hidden") {
             panel?.orderFrontRegardless()
         }
@@ -155,7 +163,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, UNUs
         let expanding = model.isPresentingBubble
         let oldFrame = panel.frame
         let targetSize: NSSize
-        if model.isShowingEncouragement {
+        if model.isShowingCompactBubble {
             targetSize = encouragementSize
         } else if expanding {
             targetSize = expandedSize
